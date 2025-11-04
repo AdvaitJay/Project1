@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Secure Portal Guard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <header class="header">
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1rem;">
+      <div class="font-semibold">Secure Portal Guard</div>
+      <nav class="flex items-center gap-4">
+        <a href="{{ url_for('index') }}" class="text-slate-700 hover:text-black">Dashboard</a>
+        <a href="{{ url_for('login') }}" class="text-slate-700 hover:text-black">Login</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container" style="padding:1.5rem 1rem;">
+    {% block content %}{% endblock %}
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,11 @@
+/* Fallback styling if Tailwind CDN fails to load */
+body { background:#f8fafc; color:#0f172a; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; }
+.container { max-width: 1152px; margin: 0 auto; padding: 1rem; }
+.header { background:#fff; box-shadow: 0 1px 2px rgba(0,0,0,0.06); position: sticky; top:0; z-index:20; }
+.card { background:#fff; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.06); padding: 1.25rem; }
+.kpi { min-height: 112px; display:flex; flex-direction:column; justify-content:space-between; }
+.table { width:100%; border-collapse: separate; border-spacing: 0; font-size: 0.875rem; }
+.table thead th { position: sticky; top: 0; background: #e2e8f0; text-align: left; padding: 0.5rem; }
+.table td { padding: 0.5rem; vertical-align: top; }
+.badge { display:inline-block; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 12px; background:#e2e8f0; color:#0f172a; white-space:nowrap; }
+.chart-wrap { position: relative; aspect-ratio: 16 / 9; }

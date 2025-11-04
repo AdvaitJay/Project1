@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: secure-web-portal-guard
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn wsgi:app"
+    plan: free
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: BLOCK_VPN
+        value: "false"
+      - key: VPN_ALLOWLIST
+        value: "127.0.0.1,::1"
+      # Optional: set your database URL for persistence (Render PostgreSQL)
+      # - key: DATABASE_URL
+      #   fromDatabase:
+      #     name: secure-db
+      #     property: connectionString

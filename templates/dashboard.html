@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid md:grid-cols-4 gap-6">
+  <div class="card"><div class="text-sm text-slate-500">VPN</div><div id="count-vpn" class="text-3xl font-semibold">0</div></div>
+  <div class="card"><div class="text-sm text-slate-500">Honeyfield</div><div id="count-honeyfield" class="text-3xl font-semibold">0</div></div>
+  <div class="card"><div class="text-sm text-slate-500">Honeypot</div><div id="count-honeypot" class="text-3xl font-semibold">0</div></div>
+  <div class="card"><div class="text-sm text-slate-500">Behavior</div><div id="count-behavior" class="text-3xl font-semibold">0</div><div class="text-xs text-slate-500">Erratic: <span id="count-behavior-err">0</span></div></div>
+</div>
+
+<div class="mt-6 card">
+  <h3 class="text-lg font-semibold mb-3">Events (last 7 days)</h3>
+  <div class="chart-wrap"><canvas id="dailyChart"></canvas></div>
+</div>
+
+<div class="mt-6 grid md:grid-cols-2 gap-6">
+  <div class="card">
+    <h3 class="text-lg font-semibold mb-3">Recent Behavior</h3>
+    <div class="overflow-auto max-h-[320px]">
+      <table class="min-w-full text-sm">
+        <thead class="sticky top-0 bg-slate-100"><tr><th class="p-2 text-left">Time</th><th class="p-2 text-left">Severity</th><th class="p-2 text-left">Tags</th><th class="p-2 text-left">IP</th></tr></thead>
+        <tbody id="behaviorBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h3 class="text-lg font-semibold mb-3">Recent VPN / Honeypot / Honeyfield</h3>
+    <div class="overflow-auto max-h-[320px]">
+      <table class="min-w-full text-sm">
+        <thead class="sticky top-0 bg-slate-100"><tr><th class="p-2 text-left">Time</th><th class="p-2 text-left">Kind</th><th class="p-2 text-left">Severity</th><th class="p-2 text-left">IP</th></tr></thead>
+        <tbody id="otherBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadMetrics(){
+  const r = await fetch('/api/metrics'); const data = await r.json();
+  document.getElementById('count-vpn').textContent = data.counts.vpn||0;
+  document.getElementById('count-honeyfield').textContent = data.counts.honeyfield||0;
+  document.getElementById('count-honeypot').textContent = data.counts.honeypot||0;
+  document.getElementById('count-behavior').textContent = data.counts.behavior||0;
+  document.getElementById('count-behavior-err').textContent = data.counts.behavior_erratic||0;
+
+  const labels = Object.keys(data.daily||{}).sort();
+  const vpn = labels.map(d=>data.daily[d].vpn||0);
+  const honeyfield = labels.map(d=>data.daily[d].honeyfield||0);
+  const honeypot = labels.map(d=>data.daily[d].honeypot||0);
+  const behavior = labels.map(d=>data.daily[d].behavior||0);
+  const ctx = document.getElementById('dailyChart').getContext('2d');
+  if(window.__chart){ window.__chart.destroy(); }
+  window.__chart = new Chart(ctx, {
+    type: 'line', data:{ labels, datasets:[
+      {label:'VPN', data:vpn}, {label:'Honeyfield', data:honeyfield}, {label:'Honeypot', data:honeypot}, {label:'Behavior', data:behavior}
+    ]}, options:{ responsive:true, maintainAspectRatio:true, aspectRatio:16/9, plugins:{legend:{position:'bottom'}} }
+  });
+}
+async function loadTable(kind, bodyId, per=15){
+  const r = await fetch(`/api/events?kind=${kind}&page=1&per=${per}`); const data = await r.json();
+  const tb = document.getElementById(bodyId); tb.innerHTML='';
+  for(const row of data.items){
+    const tags = (row.details && row.details.tags) ? row.details.tags : [];
+    const tr = document.createElement('tr');
+    if(kind==='behavior'){
+      tr.innerHTML = `<td class="p-2">${new Date(row.created_at).toLocaleString()}</td><td class="p-2">${row.severity}</td><td class="p-2">${tags.join(', ')}</td><td class="p-2">${row.ip||''}</td>`;
+    } else {
+      tr.innerHTML = `<td class="p-2">${new Date(row.created_at).toLocaleString()}</td><td class="p-2">${row.kind}</td><td class="p-2">${row.severity}</td><td class="p-2">${row.ip||''}</td>`;
+    }
+    tb.appendChild(tr);
+  }
+}
+function refreshAll(){
+  loadMetrics();
+  loadTable('behavior','behaviorBody');
+  loadTable('vpn','otherBody',5); loadTable('honeypot','otherBody',5); loadTable('honeyfield','otherBody',5);
+}
+refreshAll(); setInterval(refreshAll, 5000);
+
+// start lightweight behavior tracker
+(function(){
+  const tracker = {clicks:0, keys:0, moves:0, path:[], start:performance.now(), last:0};
+  window.addEventListener('click', ()=>tracker.clicks++);
+  window.addEventListener('keydown', ()=>tracker.keys++);
+  window.addEventListener('mousemove', (e)=>{
+    tracker.moves++;
+    const now = performance.now();
+    if(now - tracker.last >= 50){
+      tracker.last = now;
+      tracker.path.push({x:e.clientX,y:e.clientY,t:Math.round(now)});
+      if(tracker.path.length>300) tracker.path.shift();
+    }
+  });
+  setInterval(async ()=>{
+    const payload = {clicks:tracker.clicks, keys:tracker.keys, moves:tracker.moves, duration_ms: Math.round(performance.now()-tracker.start), path:tracker.path.slice()};
+    tracker.clicks=0; tracker.keys=0; tracker.moves=0; tracker.path=[]; tracker.start=performance.now();
+    try{ await fetch('/api/behavior',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch(e){}
+  }, 3000);
+})();
+</script>
+{% endblock %}

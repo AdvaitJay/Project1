@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-lg mx-auto card">
+  <h2 class="text-xl font-semibold mb-4">Simulate Threats</h2>
+  {% if message %}
+    <div class="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded">{{ message }}</div>
+  {% endif %}
+  <form method="post" class="space-y-3">
+    <button name="trigger" value="vpn" class="w-full py-2 rounded bg-slate-900 text-white">Trigger VPN event</button>
+    <button name="trigger" value="honeypot" class="w-full py-2 rounded bg-amber-700 text-white">Trigger Honeypot event</button>
+    <button name="trigger" value="honeyfield" class="w-full py-2 rounded bg-rose-600 text-white">Trigger Honeyfield event</button>
+    <button name="trigger" value="behavior" class="w-full py-2 rounded bg-indigo-600 text-white">Trigger Erratic Behavior</button>
+  </form>
+  <p class="text-sm text-slate-500 mt-3">Use this page to test dashboard refresh and event logging.</p>
+</div>
+{% endblock %}

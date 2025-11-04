@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto p-6 bg-white rounded-xl shadow text-center">
+  {% if result == "honeyfield" %}
+  <p>Submission blocked due to honeyfield trigger.</p>
+  {% elif result == "success" %}
+  <p>Login OK.</p>
+  {% else %}
+  <p>Login failed.</p>
+  {% endif %}
+  <a href="{{ url_for('index') }}" class="inline-block mt-4 px-4 py-2 rounded bg-slate-900 text-white">Back to Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto p-6 bg-white rounded-xl shadow text-center">
+  <h2 class="text-xl font-semibold mb-2">Locked</h2>
+  <p class="text-slate-600">Too many failed attempts. Activity recorded.</p>
+  <a href="{{ url_for('index') }}" class="inline-block mt-4 px-4 py-2 rounded bg-slate-900 text-white">Back to Dashboard</a>
+</div>
+{% endblock %}

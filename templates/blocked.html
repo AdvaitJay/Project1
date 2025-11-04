@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto p-8 bg-white rounded-xl shadow text-center">
+  <h2 class="text-xl font-semibold mb-2">Access Restricted</h2>
+  <p class="text-slate-600">Your request appears to originate from a VPN or proxy and has been blocked.</p>
+  <a href="{{ url_for('index') }}" class="inline-block mt-4 px-4 py-2 rounded bg-slate-900 text-white">Try Again</a>
+</div>
+{% endblock %}
